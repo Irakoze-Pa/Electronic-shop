@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build and test output
+dist/
+coverage/
+
+# Local environment files (templates stay versioned)
+.env
+.env.*
+!.env.example
+
+# Runtime files
+uploads/
+*.log
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# TypeScript and Vite caches
+*.tsbuildinfo
+.vite/
