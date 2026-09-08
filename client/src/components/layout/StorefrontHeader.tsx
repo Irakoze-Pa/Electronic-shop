@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { categories } from "../../data/catalog";
+import { useCatalogOptions } from "../../hooks/useCatalogOptions";
 import {
   CartIcon,
   CloseIcon,
@@ -14,6 +14,7 @@ export function StorefrontHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { categories } = useCatalogOptions();
 
   function submitSearch(event: FormEvent) {
     event.preventDefault();
@@ -28,7 +29,7 @@ export function StorefrontHeader() {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="bg-[#1F88C9] px-4 py-2 text-center text-xs font-medium text-white">
-        Free delivery in Kigali on orders over RWF 150,000
+        Free delivery in Kigali on orders over RWF 1,500,000
       </div>
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-4 lg:px-8">
         <button
@@ -127,7 +128,7 @@ export function StorefrontHeader() {
           {categories.map((category) => (
             <NavLink
               className="shrink-0 text-sm font-medium text-slate-600 hover:text-[#CA7209]"
-              key={category.id}
+              key={category._id}
               to={`/categories/${category.slug}`}
             >
               {category.name}
@@ -168,7 +169,7 @@ export function StorefrontHeader() {
               {categories.map((category) => (
                 <NavLink
                   className="border-b border-slate-100 py-3 text-slate-700"
-                  key={category.id}
+                  key={category._id}
                   onClick={() => setIsMenuOpen(false)}
                   to={`/categories/${category.slug}`}
                 >

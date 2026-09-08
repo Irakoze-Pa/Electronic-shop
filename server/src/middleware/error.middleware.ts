@@ -39,6 +39,11 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
+  if (error instanceof mongoose.Error.CastError) {
+    response.status(400).json({ success: false, message: "Invalid identifier" });
+    return;
+  }
+
   if (
     typeof error === "object" &&
     error !== null &&

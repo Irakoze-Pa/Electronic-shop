@@ -1,9 +1,40 @@
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { listCategories, listProducts } from "../api/catalog";
 import { ProductSection } from "../components/catalog/ProductSection";
+import { ErrorState, LoadingGrid } from "../components/ui/AsyncState";
 import { HeadsetIcon, ShieldIcon, TruckIcon } from "../components/ui/Icons";
-import { categories, products } from "../data/catalog";
+import type { Category, Product } from "../types/catalog";
+import { formatApiError } from "../utils/format";
 
 export function HomePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [categoryData, featuredData, newData, bestData] = await Promise.all([
+        listCategories(),
+        listProducts({ status: "Active", featured: true, limit: 4 }),
+        listProducts({ status: "Active", newArrival: true, limit: 4 }),
+        listProducts({ status: "Active", bestSeller: true, limit: 4 }),
+      ]);
+      setCategories(categoryData.filter((item) => item.status === "Active"));
+      setFeatured(featuredData.data);
+      setNewArrivals(newData.data);
+      setBestSellers(bestData.data);
+      setError("");
+    } catch (reason: unknown) { setError(formatApiError(reason)); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timeout);
+  }, [load]);
   return (
     <main>
       <section className="overflow-hidden bg-slate-950 px-5 py-16 text-white sm:py-24 lg:px-8">
@@ -71,14 +102,14 @@ export function HomePage() {
             {categories.map((category) => (
               <Link
                 className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-900"
-                key={category.id}
+                key={category._id}
                 to={`/categories/${category.slug}`}
               >
                 <img
                   alt=""
                   className="h-full w-full object-cover opacity-65 transition duration-500 group-hover:scale-105"
                   loading="lazy"
-                  src={category.imageUrl}
+                  src={category.image || "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=800&q=80"}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
@@ -93,18 +124,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <div className="bg-slate-50">
-        <ProductSection
-          eyebrow="Chosen for you"
-          products={products.filter((product) => product.isFeatured)}
-          title="Featured products"
-        />
-      </div>
-      <ProductSection
-        eyebrow="Just arrived"
-        products={products.filter((product) => product.isNew)}
-        title="New arrivals"
-      />
+      {error ? <section className="mx-auto max-w-7xl px-5 py-16"><ErrorState message={error} onRetry={() => void load()} /></section> : loading ? <section className="mx-auto max-w-7xl px-5 py-16"><LoadingGrid /></section> : <><div className="bg-slate-50"><ProductSection eyebrow="Chosen for you" products={featured} title="Featured products" /></div><ProductSection eyebrow="Just arrived" products={newArrivals} title="New arrivals" /></>}
 
       <section className="px-5 py-8 lg:px-8">
         <div className="mx-auto grid max-w-7xl overflow-hidden rounded-3xl bg-[#1F88C9] text-white lg:grid-cols-2">
@@ -135,13 +155,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <div className="bg-white">
-        <ProductSection
-          eyebrow="Customer favorites"
-          products={products.filter((product) => product.isBestSeller)}
-          title="Best sellers"
-        />
-      </div>
+      {!loading && !error && <div className="bg-white"><ProductSection eyebrow="Customer favorites" products={bestSellers} title="Best sellers" /></div>}
 
       <section className="bg-slate-50 px-5 py-16 lg:px-8" id="benefits">
         <div className="mx-auto max-w-7xl">

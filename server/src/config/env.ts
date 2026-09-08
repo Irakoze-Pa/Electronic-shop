@@ -8,6 +8,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(5000),
   MONGODB_URI: z.string().min(1),
   CLIENT_URL: z.string().url().default("http://localhost:5173"),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+  CLOUDINARY_API_KEY: z.string().min(1).optional(),
+  CLOUDINARY_API_SECRET: z.string().min(1).optional(),
+  CLOUDINARY_FOLDER: z.string().min(1).default("electronic-shop/catalog"),
 });
 
 const result = envSchema.safeParse(process.env);

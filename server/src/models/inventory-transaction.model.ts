@@ -1,11 +1,5 @@
 import { Schema, model } from "mongoose";
 
-export const inventoryTransactionTypes = [
-  "inbound",
-  "outbound",
-  "adjustment",
-] as const;
-
 const inventoryTransactionSchema = new Schema(
   {
     product: {
@@ -14,7 +8,11 @@ const inventoryTransactionSchema = new Schema(
       required: true,
       index: true,
     },
-    type: { type: String, enum: inventoryTransactionTypes, required: true },
+    type: {
+      type: String,
+      enum: ["inbound", "outbound", "adjustment"],
+      required: true,
+    },
     quantity: { type: Number, required: true },
     previousStock: { type: Number, required: true, min: 0 },
     resultingStock: { type: Number, required: true, min: 0 },
