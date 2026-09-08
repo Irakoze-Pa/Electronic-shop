@@ -8,22 +8,28 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:admin": "tsx src/scripts/seed-admin.ts"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
+    "cookie-parser": "^1.4.7",
     "cors": "latest",
     "dotenv": "latest",
     "express": "latest",
     "helmet": "latest",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "latest",
     "morgan": "latest",
     "zod": "latest"
   },
   "devDependencies": {
     "@eslint/js": "latest",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "latest",
     "@types/express": "latest",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "latest",
     "@types/node": "latest",
     "eslint": "latest",

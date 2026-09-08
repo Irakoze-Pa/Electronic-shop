@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCatalogOptions } from "../../hooks/useCatalogOptions";
+import { useAuth } from "../../auth/useAuth";
 import {
   CartIcon,
   CloseIcon,
@@ -14,6 +15,7 @@ export function StorefrontHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const auth = useAuth();
   const { categories } = useCatalogOptions();
 
   function submitSearch(event: FormEvent) {
@@ -76,9 +78,32 @@ export function StorefrontHeader() {
           </button>
         </form>
         <div className="ml-auto flex items-center gap-1">
-          <Link aria-label="Account" className={iconLink} to="/account">
+          {auth.user?.role === "Admin" && (
+            <Link
+              className="hidden rounded-full px-3 py-2 text-xs font-bold text-[#1F88C9] hover:bg-slate-100 lg:block"
+              to="/admin/products"
+            >
+              Admin
+            </Link>
+          )}
+          <Link
+            aria-label={
+              auth.user ? `Account for ${auth.user.firstName}` : "Log in"
+            }
+            className={iconLink}
+            to={auth.user ? "/account" : "/login"}
+          >
             <UserIcon className="size-5" />
           </Link>
+          {auth.user && (
+            <button
+              className="hidden px-2 text-xs font-bold text-slate-600 hover:text-[#CA7209] sm:block"
+              onClick={() => void auth.logout()}
+              type="button"
+            >
+              Log out
+            </button>
+          )}
           <Link aria-label="Wishlist" className={iconLink} to="/wishlist">
             <HeartIcon className="size-5" />
           </Link>

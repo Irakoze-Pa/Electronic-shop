@@ -1,6 +1,25 @@
 import { Router } from "express";
-import { createProduct, deleteProduct, getProduct, listProducts, updateProduct } from "./product.controller.js";
+import {
+  createProduct,
+  deleteProduct,
+  getProduct,
+  listProducts,
+  updateProduct,
+} from "./product.controller.js";
+import {
+  optionalAuth,
+  requireAuth,
+  requireRole,
+} from "../auth/auth.middleware.js";
 
 export const productRouter = Router();
-productRouter.route("/").get(listProducts).post(createProduct);
-productRouter.route("/:id").get(getProduct).patch(updateProduct).delete(deleteProduct);
+const requireAdmin = [requireAuth, requireRole("Admin")];
+productRouter
+  .route("/")
+  .get(optionalAuth, listProducts)
+  .post(requireAdmin, createProduct);
+productRouter
+  .route("/:id")
+  .get(optionalAuth, getProduct)
+  .patch(requireAdmin, updateProduct)
+  .delete(requireAdmin, deleteProduct);

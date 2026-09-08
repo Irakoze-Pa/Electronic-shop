@@ -10,7 +10,10 @@ export const uploadImage: RequestHandler = async (request, response) => {
     throw new AppError("Image file is required", 400);
   }
 
-  const image = await uploadCatalogImage(request.body);
+  const mimeType = request.get("content-type")?.split(";", 1)[0];
+  if (!mimeType) throw new AppError("Image Content-Type is required", 415);
+
+  const image = await uploadCatalogImage(request.body, mimeType);
   response.status(201).json({
     success: true,
     data: image,

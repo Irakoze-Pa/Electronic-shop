@@ -1,7 +1,6 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import mongoose from "mongoose";
 import { ZodError } from "zod";
-import { env } from "../config/env.js";
 import { AppError } from "../utils/AppError.js";
 
 export const notFoundHandler: RequestHandler = (request, _response, next) => {
@@ -66,8 +65,5 @@ export const errorHandler: ErrorRequestHandler = (
   response.status(statusCode).json({
     success: false,
     message,
-    ...(env.NODE_ENV === "development" && error instanceof Error
-      ? { stack: error.stack }
-      : {}),
   });
 };
