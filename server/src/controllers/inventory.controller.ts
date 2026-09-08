@@ -40,7 +40,7 @@ export const createInventoryTransaction: RequestHandler = async (request, respon
       const product = await Product.findOneAndUpdate(
         { _id: input.product, stock: { $gte: Math.max(-change, 0) } },
         { $inc: { stock: change } },
-        { new: false, session },
+        { returnDocument: "before", session },
       );
       if (!product) {
         throw new AppError("Product not found or stock would become negative", 400);

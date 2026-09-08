@@ -125,15 +125,17 @@ export function StorefrontHeader() {
           >
             All products
           </NavLink>
-          {categories.map((category) => (
-            <NavLink
-              className="shrink-0 text-sm font-medium text-slate-600 hover:text-[#CA7209]"
-              key={category._id}
-              to={`/categories/${category.slug}`}
-            >
-              {category.name}
-            </NavLink>
-          ))}
+          {categories
+            .filter((category) => category.status === "Active")
+            .map((category) => (
+              <NavLink
+                className="shrink-0 text-sm font-medium text-slate-600 hover:text-[#CA7209]"
+                key={category._id}
+                to={`/categories/${category.slug}`}
+              >
+                {category.name}
+              </NavLink>
+            ))}
         </div>
       </nav>
       {isMenuOpen && (
@@ -166,16 +168,18 @@ export function StorefrontHeader() {
               >
                 All products
               </NavLink>
-              {categories.map((category) => (
-                <NavLink
-                  className="border-b border-slate-100 py-3 text-slate-700"
-                  key={category._id}
-                  onClick={() => setIsMenuOpen(false)}
-                  to={`/categories/${category.slug}`}
-                >
-                  {category.name}
-                </NavLink>
-              ))}
+              {categories
+                .filter((category) => category.status === "Active")
+                .map((category) => (
+                  <NavLink
+                    className="border-b border-slate-100 py-3 text-slate-700"
+                    key={category._id}
+                    onClick={() => setIsMenuOpen(false)}
+                    to={`/categories/${category.slug}`}
+                  >
+                    {category.name}
+                  </NavLink>
+                ))}
             </div>
           </nav>
         </div>

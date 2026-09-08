@@ -7,15 +7,19 @@ let server: Server | undefined;
 
 async function start(): Promise<void> {
   await connectDatabase();
-  server = app.listen(env.PORT, () => {
-    console.info(`API listening on http://localhost:${env.PORT}`);
+  server = await new Promise<Server>((resolve, reject) => {
+    const listener = app.listen(env.PORT, () => {
+      console.info(`API listening on http://localhost:${env.PORT}`);
+      resolve(listener);
+    });
+    listener.once("error", reject);
   });
 }
 
 async function shutdown(signal: string): Promise<void> {
   console.info(`${signal} received; shutting down`);
 
-  if (server) {
+  if (server?.listening) {
     await new Promise<void>((resolve, reject) => {
       server?.close((error) => (error ? reject(error) : resolve()));
     });

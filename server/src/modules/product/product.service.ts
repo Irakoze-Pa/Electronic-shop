@@ -46,7 +46,7 @@ export const productService = {
     }
     const slug = input.name ? slugify(input.name) : undefined; const code = input.code?.toUpperCase();
     if ((slug || code) && (await Product.exists({ _id: { $ne: id }, $or: [...(slug ? [{ slug }] : []), ...(code ? [{ code }] : [])] }))) throw new AppError("Product slug or code already exists", 409);
-    const product = await Product.findByIdAndUpdate(id, { ...input, ...(slug ? { slug } : {}), ...(code ? { code } : {}) }, { new: true, runValidators: true });
+    const product = await Product.findByIdAndUpdate(id, { ...input, ...(slug ? { slug } : {}), ...(code ? { code } : {}) }, { returnDocument: "after", runValidators: true });
     if (!product) throw new AppError("Product not found", 404); return product;
   },
   async remove(id: string) { const product = await Product.findByIdAndDelete(id); if (!product) throw new AppError("Product not found", 404); },

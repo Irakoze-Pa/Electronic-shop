@@ -19,7 +19,7 @@ export const categoryService = {
   async update(id: string, input: Partial<CategoryInput>) {
     const slug = input.name ? slugify(input.name) : undefined;
     if (slug && (await Category.exists({ slug, _id: { $ne: id } }))) throw new AppError("Category slug already exists", 409);
-    const category = await Category.findByIdAndUpdate(id, { ...input, ...(slug ? { slug } : {}) }, { new: true, runValidators: true });
+    const category = await Category.findByIdAndUpdate(id, { ...input, ...(slug ? { slug } : {}) }, { returnDocument: "after", runValidators: true });
     if (!category) throw new AppError("Category not found", 404);
     return category;
   },
