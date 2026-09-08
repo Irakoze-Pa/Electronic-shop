@@ -12,6 +12,8 @@ import { RequireAdmin, RequireAuth } from "./auth/ProtectedRoute";
 import { AccountPage } from "./pages/AccountPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { CartPage } from "./pages/CartPage";
+import { WishlistPage } from "./pages/WishlistPage";
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="categories/:slug" element={<ShopPage />} />
         <Route element={<RequireAuth />}>
           <Route path="account" element={<AccountPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="wishlist" element={<WishlistPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

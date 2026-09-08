@@ -30,10 +30,7 @@ export function LoginPage() {
         password: String(data.get("password")),
       });
       const requested = (location.state as { from?: string } | null)?.from;
-      navigate(
-        user.role === "Admin" ? (requested ?? "/admin/products") : "/account",
-        { replace: true },
-      );
+      navigate(requested ?? (user.role === "Admin" ? "/admin/products" : "/account"), { replace: true });
     } catch (reason: unknown) {
       setError(formatApiError(reason));
     } finally {

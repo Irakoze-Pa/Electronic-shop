@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCatalogOptions } from "../../hooks/useCatalogOptions";
 import { useAuth } from "../../auth/useAuth";
+import { useCart } from "../../cart/useCart";
+import { useWishlist } from "../../wishlist/useWishlist";
 import {
   CartIcon,
   CloseIcon,
@@ -16,6 +18,8 @@ export function StorefrontHeader() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const auth = useAuth();
+  const cart = useCart();
+  const wishlist = useWishlist();
   const { categories } = useCatalogOptions();
 
   function submitSearch(event: FormEvent) {
@@ -106,16 +110,15 @@ export function StorefrontHeader() {
           )}
           <Link aria-label="Wishlist" className={iconLink} to="/wishlist">
             <HeartIcon className="size-5" />
+            {wishlist.wishlistCount > 0 && <span className="absolute right-0 top-0 grid size-5 place-items-center rounded-full bg-[#1F88C9] text-[10px] font-bold text-white">{wishlist.wishlistCount > 99 ? "99+" : wishlist.wishlistCount}</span>}
           </Link>
           <Link
-            aria-label="Shopping cart, 2 items"
+            aria-label={`Shopping cart, ${cart.cartCount} items`}
             className={iconLink}
             to="/cart"
           >
             <CartIcon className="size-5" />
-            <span className="absolute right-0 top-0 grid size-5 place-items-center rounded-full bg-[#CA7209] text-[10px] font-bold text-white">
-              2
-            </span>
+            {cart.cartCount > 0 && <span className="absolute right-0 top-0 grid size-5 place-items-center rounded-full bg-[#CA7209] text-[10px] font-bold text-white">{cart.cartCount > 99 ? "99+" : cart.cartCount}</span>}
           </Link>
         </div>
       </div>
