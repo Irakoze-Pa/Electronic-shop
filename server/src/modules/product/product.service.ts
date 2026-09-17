@@ -29,6 +29,13 @@ export const productService = {
     if (query.featured !== undefined) filter.featured = query.featured;
     if (query.bestSeller !== undefined) filter.bestSeller = query.bestSeller;
     if (query.newArrival !== undefined) filter.newArrival = query.newArrival;
+    if (query.inventoryStatus === "out-of-stock") filter.stock = 0;
+    if (query.inventoryStatus === "low-stock") {
+      filter.stock = { $gt: 0 };
+      filter.$expr = { $lte: ["$stock", "$lowStockThreshold"] };
+    }
+    if (query.inventoryStatus === "in-stock")
+      filter.$expr = { $gt: ["$stock", "$lowStockThreshold"] };
     const sorts: Record<ProductQuery["sort"], Record<string, SortOrder>> = {
       newest: { createdAt: -1 },
       oldest: { createdAt: 1 },

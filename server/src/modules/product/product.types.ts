@@ -10,6 +10,7 @@ export interface ProductInput {
   price: number;
   oldPrice?: number | null;
   stock: number;
+  lowStockThreshold: number;
   unit: string;
   status: CatalogStatus;
   featured: boolean;
@@ -27,6 +28,7 @@ export interface ProductQuery {
   featured?: boolean;
   bestSeller?: boolean;
   newArrival?: boolean;
+  inventoryStatus?: "in-stock" | "low-stock" | "out-of-stock";
   sort: "newest" | "oldest" | "price-asc" | "price-desc" | "name-asc";
   page: number;
   limit: number;

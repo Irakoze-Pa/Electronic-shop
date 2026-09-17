@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { requireAuth, requireRole } from "../auth/auth.middleware.js";
+import { customer, customers, dashboard, report, updateCustomerStatus } from "./admin.controller.js";
+export const adminRouter = Router();
+adminRouter.use(requireAuth, requireRole("Admin"));
+adminRouter.get("/dashboard", dashboard);
+adminRouter.get("/reports/sales", report);
+adminRouter.get("/customers", customers);
+adminRouter.get("/customers/:id", customer);
+adminRouter.patch("/customers/:id/status", updateCustomerStatus);

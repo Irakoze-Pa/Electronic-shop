@@ -4,6 +4,8 @@ import { StatusBadge } from "./StatusBadge";
 import type { CatalogStatus } from "../../types/catalog";
 import { formatApiError } from "../../utils/format";
 import { ImageUploadButton } from "./ImageUploadButton";
+import { Link } from "react-router-dom";
+import { ConfirmDialog, Modal } from "../ui/Modal";
 
 export interface CatalogEntity {
   _id: string;
@@ -41,6 +43,8 @@ export function CatalogEntityManager({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<CatalogEntity | null>(null);
+  const [deleting, setDeleting] = useState(false);
   async function refresh() {
     setLoading(true);
     try {
@@ -82,21 +86,26 @@ export function CatalogEntityManager({
     }
   }
   async function deleteItem(item: CatalogEntity) {
-    if (!window.confirm(`Delete ${item.name}?`)) return;
+    setDeleting(true);
     try {
       await remove(item._id);
+      setPendingDelete(null);
       await refresh();
     } catch (reason: unknown) {
       setError(formatApiError(reason));
+    } finally {
+      setDeleting(false);
     }
   }
   const title = noun === "brand" ? "Brands" : "Categories";
   return (
-    <main className="p-5 sm:p-8">
+    <main className="admin-page">
       <AdminPageHeader
         action={
+          <div className="flex gap-2">
+          <Link className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold" to="/admin/products">← Products</Link>
           <button
-            className="rounded-xl bg-[#1F88C9] px-5 py-3 text-sm font-bold text-white"
+            className="rounded-xl bg-[#0ea5e9] px-5 py-3 text-sm font-bold text-white"
             onClick={() => {
               setEditing(null);
               setMedia("");
@@ -106,6 +115,7 @@ export function CatalogEntityManager({
           >
             Create {noun}
           </button>
+          </div>
         }
         description={`Create and maintain product ${title.toLowerCase()}.`}
         title={title}
@@ -115,9 +125,9 @@ export function CatalogEntityManager({
           {error}
         </p>
       )}
-      {showForm && (
+      <Modal description={`Enter the ${noun} details used throughout your product catalog.`} onClose={() => { if (!busy) setShowForm(false); }} open={showForm} size="md" title={editing ? `Edit ${editing.name}` : `Create ${noun}`}>
         <form
-          className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 sm:grid-cols-2"
+          className="grid gap-4 p-6 sm:grid-cols-2"
           key={editing?._id ?? `new-${noun}`}
           onSubmit={submit}
         >
@@ -157,7 +167,7 @@ export function CatalogEntityManager({
           />
           <div className="flex gap-3 sm:col-span-2">
             <button
-              className="rounded-xl bg-[#1F88C9] px-5 py-3 text-sm font-bold text-white disabled:opacity-50"
+              className="rounded-xl bg-[#0ea5e9] px-5 py-3 text-sm font-bold text-white disabled:opacity-50"
               disabled={busy}
               type="submit"
             >
@@ -172,7 +182,8 @@ export function CatalogEntityManager({
             </button>
           </div>
         </form>
-      )}
+      </Modal>
+      <ConfirmDialog busy={deleting} description={pendingDelete ? `This will permanently remove “${pendingDelete.name}”. Products using it may need to be reassigned.` : ""} onCancel={() => setPendingDelete(null)} onConfirm={() => pendingDelete && void deleteItem(pendingDelete)} open={Boolean(pendingDelete)} title={`Delete ${noun}?`} />
       <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-2xl text-left text-sm">
@@ -194,7 +205,7 @@ export function CatalogEntityManager({
                   </td>
                   <td className="px-5 text-right">
                     <button
-                      className="mr-4 font-bold text-[#1F88C9]"
+                      className="mr-4 font-bold text-[#0ea5e9]"
                       onClick={() => {
                         setEditing(item);
                         setMedia(item.media);
@@ -206,7 +217,7 @@ export function CatalogEntityManager({
                     </button>
                     <button
                       className="font-bold text-red-600"
-                      onClick={() => void deleteItem(item)}
+                      onClick={() => setPendingDelete(item)}
                       type="button"
                     >
                       Delete

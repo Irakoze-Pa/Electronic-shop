@@ -35,6 +35,7 @@ const productSchema = new Schema(
     price: { type: Number, required: true, min: 0 },
     oldPrice: { type: Number, min: 0, default: null },
     stock: { type: Number, required: true, min: 0, default: 0 },
+    lowStockThreshold: { type: Number, required: true, min: 0, default: 5 },
     unit: { type: String, required: true, trim: true, default: "piece" },
     status: {
       type: String,
@@ -57,4 +58,5 @@ productSchema.index({
   shortDescription: "text",
   description: "text",
 });
+productSchema.index({ stock: 1, lowStockThreshold: 1 });
 export const Product = model("Product", productSchema);

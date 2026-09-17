@@ -40,7 +40,7 @@ export function ImageUploadButton({
         type="file"
       />
       <button
-        className="rounded-xl border border-[#1F88C9] px-4 py-2 text-sm font-bold text-[#1F88C9] disabled:opacity-50"
+        className="rounded-xl border border-[#0ea5e9] px-4 py-2 text-sm font-bold text-[#0ea5e9] disabled:opacity-50"
         disabled={uploading}
         onClick={() => input.current?.click()}
         type="button"

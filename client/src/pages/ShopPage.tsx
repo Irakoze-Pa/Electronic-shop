@@ -10,6 +10,7 @@ import {
 import { useCatalogOptions } from "../hooks/useCatalogOptions";
 import type { CatalogStatus, Product, ProductFilters } from "../types/catalog";
 import { formatApiError } from "../utils/format";
+import { Modal } from "../components/ui/Modal";
 
 export function ShopPage() {
   const { slug } = useParams();
@@ -77,11 +78,11 @@ export function ShopPage() {
   }, [load]);
 
   const filterPanel = (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <label className="block">
         <span className="mb-2 block text-sm font-bold">Category</span>
         <select
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm"
+          className="form-control"
           disabled={Boolean(slug)}
           onChange={(event) => {
             setCategory(event.target.value);
@@ -102,7 +103,7 @@ export function ShopPage() {
       <label className="block">
         <span className="mb-2 block text-sm font-bold">Brand</span>
         <select
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm"
+          className="form-control"
           onChange={(event) => {
             setBrand(event.target.value);
             setPage(1);
@@ -120,7 +121,7 @@ export function ShopPage() {
         </select>
       </label>
       <button
-        className="text-sm font-bold text-[#CA7209]"
+        className="text-sm font-bold text-[#f97316]"
         onClick={() => {
           setCategory("");
           setBrand("");
@@ -134,21 +135,22 @@ export function ShopPage() {
   );
 
   return (
-    <main className="bg-slate-50 px-5 py-12 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#CA7209]">
+    <main className="min-h-screen bg-slate-50 px-5 py-12 lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-[1440px]">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#f97316]">
           Curated technology
         </p>
-        <h1 className="mt-2 text-4xl font-black tracking-tight">
+        <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
           {slug
             ? (options.categories.find((item) => item.slug === slug)?.name ??
               "Category")
             : "Shop all products"}
         </h1>
-        <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row">
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">Explore business-ready technology, genuine accessories, and dependable everyday electronics.</p>
+        <div className="admin-card mt-8 flex flex-col gap-3 p-4 sm:flex-row">
           <input
             aria-label="Search catalog"
-            className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#1F88C9]"
+            className="form-control min-w-0 flex-1"
             onChange={(event) => {
               setSearch(event.target.value);
               setPage(1);
@@ -159,7 +161,7 @@ export function ShopPage() {
           />
           <select
             aria-label="Sort products"
-            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
+            className="form-control sm:w-52"
             onChange={(event) => {
               setSort(event.target.value as ProductFilters["sort"]);
               setPage(1);
@@ -172,26 +174,20 @@ export function ShopPage() {
             <option value="name-asc">Name</option>
           </select>
           <button
-            className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold lg:hidden"
+            className="button-secondary lg:hidden"
             onClick={() => setShowFilters((value) => !value)}
             type="button"
           >
             Filters
           </button>
         </div>
-        {showFilters && (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 lg:hidden">
-            {filterPanel}
-          </div>
-        )}
+        <Modal description="Refine the catalog by category and brand." onClose={() => setShowFilters(false)} open={showFilters} size="md" title="Filter products"><div className="p-6">{filterPanel}<button className="button-primary mt-7 w-full" onClick={() => setShowFilters(false)} type="button">Show {pagination.total} products</button></div></Modal>
         <div className="mt-8 grid gap-8 lg:grid-cols-[230px_1fr]">
-          <aside className="hidden self-start rounded-2xl border border-slate-200 bg-white p-5 lg:block">
+          <aside className="admin-card hidden self-start p-6 lg:block">
             {filterPanel}
           </aside>
           <section>
-            <p className="mb-5 text-sm text-slate-500">
-              {pagination.total} products
-            </p>
+            <div className="mb-5 flex items-center justify-between"><p className="text-sm font-semibold text-slate-700">{pagination.total} products</p><p className="text-xs text-slate-400">Verified catalog</p></div>
             {loading ? (
               <LoadingGrid count={6} />
             ) : error ? (
@@ -208,7 +204,7 @@ export function ShopPage() {
             {pagination.pages > 1 && (
               <div className="mt-8 flex items-center justify-center gap-3">
                 <button
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold disabled:opacity-40"
+                  className="button-secondary disabled:opacity-40"
                   disabled={page <= 1}
                   onClick={() => setPage((value) => value - 1)}
                   type="button"
@@ -219,7 +215,7 @@ export function ShopPage() {
                   Page {pagination.page} of {pagination.pages}
                 </span>
                 <button
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold disabled:opacity-40"
+                  className="button-secondary disabled:opacity-40"
                   disabled={page >= pagination.pages}
                   onClick={() => setPage((value) => value + 1)}
                   type="button"

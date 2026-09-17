@@ -14,6 +14,7 @@ const productFields = () => ({
   price: z.number().nonnegative(),
   oldPrice: z.number().nonnegative().nullable(),
   stock: z.number().int().nonnegative(),
+  lowStockThreshold: z.number().int().nonnegative(),
   unit: z.string().trim().min(1).max(30),
   status: statusSchema,
   featured: z.boolean(),
@@ -25,6 +26,7 @@ const productFields = () => ({
 
 export const updateProductSchema = z
   .object(productFields())
+  .omit({ stock: true })
   .partial()
   .refine(
     ({ oldPrice, price }) =>
@@ -47,6 +49,7 @@ export const createProductSchema = z
     description: createFields.description.optional().default(""),
     oldPrice: createFields.oldPrice.optional().default(null),
     unit: createFields.unit.optional().default("piece"),
+    lowStockThreshold: createFields.lowStockThreshold.optional().default(5),
     status: createFields.status.optional().default("Active"),
     featured: createFields.featured.optional().default(false),
     bestSeller: createFields.bestSeller.optional().default(false),
@@ -66,6 +69,7 @@ export const productQuerySchema = z.object({
   featured: booleanQuery.optional(),
   bestSeller: booleanQuery.optional(),
   newArrival: booleanQuery.optional(),
+  inventoryStatus: z.enum(["in-stock", "low-stock", "out-of-stock"]).optional(),
   sort: z
     .enum(["newest", "oldest", "price-asc", "price-desc", "name-asc"])
     .default("newest"),

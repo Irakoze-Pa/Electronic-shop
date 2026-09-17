@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthShell, authFieldClass } from "../components/auth/AuthShell";
 import { PasswordField } from "../components/auth/PasswordField";
 import { useAuth } from "../auth/useAuth";
@@ -8,6 +8,7 @@ import { formatApiError } from "../utils/format";
 export function RegisterPage() {
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   if (!auth.loading && auth.user) return <Navigate replace to="/account" />;
@@ -30,7 +31,8 @@ export function RegisterPage() {
         phone: String(data.get("phone")),
         password,
       });
-      navigate("/account", { replace: true });
+      const requested = (location.state as { from?: string } | null)?.from;
+      navigate(requested ?? "/account", { replace: true });
     } catch (reason: unknown) {
       setError(formatApiError(reason));
     } finally {
@@ -101,12 +103,12 @@ export function RegisterPage() {
           name="confirmPassword"
         />
         {error && (
-          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {error}
           </p>
         )}
         <button
-          className="w-full rounded-xl bg-[#1F88C9] px-5 py-3 font-bold text-white disabled:opacity-50"
+          className="w-full rounded-xl bg-slate-950 hover:bg-slate-800 px-5 py-3 font-bold text-white disabled:opacity-50"
           disabled={submitting}
           type="submit"
         >
@@ -115,7 +117,7 @@ export function RegisterPage() {
       </form>
       <p className="mt-6 text-center text-sm text-slate-500">
         Already registered?{" "}
-        <Link className="font-bold text-[#1F88C9]" to="/login">
+        <Link className="font-bold text-orange-700 hover:text-orange-800" replace state={location.state} to="/login">
           Sign in
         </Link>
       </p>

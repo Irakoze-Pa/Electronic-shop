@@ -1,3 +1,4 @@
+import { WhatsAppButton } from "../components/layout/WhatsAppButton";
 import { Outlet } from "react-router-dom";
 import { StorefrontFooter } from "../components/layout/StorefrontFooter";
 import { StorefrontHeader } from "../components/layout/StorefrontHeader";
@@ -10,6 +11,7 @@ export function StorefrontLayout() {
         <Outlet />
       </div>
       <StorefrontFooter />
+      <WhatsAppButton />
     </div>
   );
 }

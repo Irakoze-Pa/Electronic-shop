@@ -14,7 +14,7 @@ export function RequireAuth() {
   const location = useLocation();
   if (auth.loading) return <AuthLoading />;
   if (!auth.user)
-    return <Navigate replace state={{ from: location.pathname }} to="/login" />;
+    return <Navigate replace state={{ from: `${location.pathname}${location.search}` }} to="/login" />;
   return <Outlet />;
 }
 
@@ -23,7 +23,7 @@ export function RequireAdmin() {
   const location = useLocation();
   if (auth.loading) return <AuthLoading />;
   if (!auth.user)
-    return <Navigate replace state={{ from: location.pathname }} to="/login" />;
+    return <Navigate replace state={{ from: `${location.pathname}${location.search}` }} to="/login" />;
   if (auth.user.role !== "Admin") return <Navigate replace to="/account" />;
   return <Outlet />;
 }

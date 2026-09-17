@@ -13,10 +13,10 @@ export function ProductSection({
 }) {
   return (
     <section className="px-5 py-16 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1440px]">
         <div className="flex items-end justify-between gap-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#CA7209]">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#f97316]">
               {eyebrow}
             </p>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
@@ -24,7 +24,7 @@ export function ProductSection({
             </h2>
           </div>
           <Link
-            className="shrink-0 text-sm font-bold text-[#1F88C9] hover:underline"
+            className="shrink-0 text-sm font-bold text-[#0ea5e9] hover:underline"
             to="/shop"
           >
             View all →

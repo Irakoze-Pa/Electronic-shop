@@ -14,6 +14,7 @@ const envSchema = z.object({
   CLOUDINARY_FOLDER: z.string().min(1).default("electronic-shop/catalog"),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.coerce.number().int().positive().default(3600),
+  SHIPPING_FEE: z.coerce.number().min(0).default(0),
   INITIAL_ADMIN_EMAIL: z.string().email().optional(),
   INITIAL_ADMIN_PASSWORD: z.string().min(8).optional(),
   INITIAL_ADMIN_FIRST_NAME: z.string().min(1).optional(),

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { stockStatus } from "../../api/admin";
 import {
   createProduct,
   deleteProduct,
@@ -9,6 +11,7 @@ import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ProductForm } from "../../components/admin/ProductForm";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { EmptyState, ErrorState } from "../../components/ui/AsyncState";
+import { ConfirmDialog, Modal } from "../../components/ui/Modal";
 import { useCatalogOptions } from "../../hooks/useCatalogOptions";
 import type { CatalogStatus, Product, ProductInput } from "../../types/catalog";
 import { currencyFormatter, formatApiError } from "../../utils/format";
@@ -22,11 +25,14 @@ export function AdminProductsPage() {
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
   const [status, setStatus] = useState<"" | CatalogStatus>("");
+  const [inventoryStatus, setInventoryStatus] = useState<"" | "in-stock" | "low-stock" | "out-of-stock">("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -35,6 +41,7 @@ export function AdminProductsPage() {
         category: category || undefined,
         brand: brand || undefined,
         status: status || undefined,
+        inventoryStatus: inventoryStatus || undefined,
         page,
         limit: 10,
       });
@@ -50,7 +57,7 @@ export function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [brand, category, page, search, status]);
+  }, [brand, category, inventoryStatus, page, search, status]);
   useEffect(() => {
     const timeout = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timeout);
@@ -70,28 +77,35 @@ export function AdminProductsPage() {
     }
   }
   async function remove(product: Product) {
-    if (!window.confirm(`Delete ${product.name}?`)) return;
+    setDeleting(true);
     try {
       await deleteProduct(product._id);
+      setPendingDelete(null);
       await load();
     } catch (reason: unknown) {
       setError(formatApiError(reason));
+    } finally {
+      setDeleting(false);
     }
   }
   return (
-    <main className="p-5 sm:p-8">
+    <main className="admin-page">
       <AdminPageHeader
         action={
-          <button
-            className="rounded-xl bg-[#1F88C9] px-5 py-3 text-sm font-bold text-white"
-            onClick={() => {
-              setEditing(null);
-              setShowForm(true);
-            }}
-            type="button"
-          >
-            Create product
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <Link className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold" to="/admin/categories">Categories</Link>
+            <Link className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold" to="/admin/brands">Brands</Link>
+            <button
+              className="rounded-xl bg-[#0ea5e9] px-5 py-3 text-sm font-bold text-white"
+              onClick={() => {
+                setEditing(null);
+                setShowForm(true);
+              }}
+              type="button"
+            >
+              Create product
+            </button>
+          </div>
         }
         description="Create, edit, filter, and maintain your product catalog."
         title="Products"
@@ -107,7 +121,7 @@ export function AdminProductsPage() {
           />
         </div>
       )}
-      {showForm && (
+      <Modal description="Complete the catalog, pricing, stock, and merchandising information." onClose={() => { if (!saving) { setShowForm(false); setEditing(null); } }} open={showForm} size="xl" title={editing ? `Edit ${editing.name}` : "Create product"}>
         <ProductForm
           brands={options.brands}
           categories={options.categories}
@@ -120,8 +134,10 @@ export function AdminProductsPage() {
           onSubmit={save}
           saving={saving}
         />
-      )}
+      </Modal>
+      <ConfirmDialog busy={deleting} description={pendingDelete ? `This will permanently remove “${pendingDelete.name}” from the product catalog.` : ""} onCancel={() => setPendingDelete(null)} onConfirm={() => pendingDelete && void remove(pendingDelete)} open={Boolean(pendingDelete)} title="Delete product?" />
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="mb-4 flex flex-wrap gap-2">{[["", "All"], ["active", "Active"], ["inactive", "Inactive"], ["low-stock", "Low Stock"], ["out-of-stock", "Out of Stock"]].map(([value, label]) => <button className="rounded-full border px-4 py-2 text-sm font-bold" key={value} onClick={() => { setStatus(value === "active" ? "Active" : value === "inactive" ? "Inactive" : ""); setInventoryStatus(value === "low-stock" || value === "out-of-stock" ? value : ""); setPage(1); }} type="button">{label}</button>)}</div>
         <div className="grid gap-3 md:grid-cols-4">
           <input
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm"
@@ -196,7 +212,7 @@ export function AdminProductsPage() {
                           src={product.images[0]}
                         />
                       ) : (
-                        <span className="grid size-11 place-items-center rounded-lg bg-slate-100 text-xs font-black text-[#1F88C9]">
+                        <span className="grid size-11 place-items-center rounded-lg bg-slate-100 text-xs font-black text-[#0ea5e9]">
                           BBG
                         </span>
                       )}
@@ -209,14 +225,15 @@ export function AdminProductsPage() {
                     {currencyFormatter.format(product.price)}
                   </td>
                   <td>
-                    {product.stock} {product.unit}
+                    {product.stock} {product.unit}<br /><span className={`text-xs font-bold ${product.stock === 0 ? "text-red-600" : product.stock <= product.lowStockThreshold ? "text-amber-600" : "text-emerald-600"}`}>{stockStatus(product)}</span>
                   </td>
                   <td>
                     <StatusBadge status={product.status} />
                   </td>
                   <td className="px-5 text-right">
+                    <Link className="mr-4 font-bold text-amber-700" to={`/admin/inventory/movements?product=${product._id}`}>Adjust</Link>
                     <button
-                      className="mr-4 font-bold text-[#1F88C9]"
+                      className="mr-4 font-bold text-[#0ea5e9]"
                       onClick={() => {
                         setEditing(product);
                         setShowForm(true);
@@ -228,7 +245,7 @@ export function AdminProductsPage() {
                     </button>
                     <button
                       className="font-bold text-red-600"
-                      onClick={() => void remove(product)}
+                      onClick={() => setPendingDelete(product)}
                       type="button"
                     >
                       Delete

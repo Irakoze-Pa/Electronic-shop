@@ -1,0 +1,18 @@
+import { http } from "./http";
+import type { ApiResponse, Product } from "../types/catalog";
+import type { Customer, CustomerDetails, DashboardData, InventoryReceipt, InventoryTransaction, InventoryType, Paginated, PurchaseOrder, SalesReport } from "../types/admin";
+export async function getDashboard() { const { data } = await http.get<ApiResponse<DashboardData>>("/admin/dashboard"); return data.data; }
+export async function getSalesReport(params: { period: string; from?: string; to?: string }) { const { data } = await http.get<ApiResponse<SalesReport>>("/admin/reports/sales", { params }); return data.data; }
+export async function listCustomers(params: { search?: string; status?: string; page?: number }) { const { data } = await http.get<Paginated<Customer>>("/admin/customers", { params }); return data; }
+export async function getCustomer(id: string) { const { data } = await http.get<ApiResponse<CustomerDetails>>(`/admin/customers/${id}`); return data.data; }
+export async function setCustomerStatus(id: string, status: "Active" | "Inactive") { const { data } = await http.patch<ApiResponse<Customer>>(`/admin/customers/${id}/status`, { status }); return data.data; }
+export async function listInventory(params: { product?: string; type?: InventoryType; from?: string; to?: string; page?: number } = {}) { const { data } = await http.get<Paginated<InventoryTransaction>>("/inventory-transactions", { params }); return data; }
+export async function adjustStock(input: { product: string; type: InventoryType; quantity: number; reason: string; note: string }) { const { data } = await http.post<ApiResponse<InventoryTransaction>>("/inventory-transactions/adjustments", input); return data.data; }
+export async function createGoodsReceipt(input: { supplierName: string; deliveryNote: string; receivedAt: string; note: string; items: Array<{ product: string; quantity: number }> }) { const { data } = await http.post<ApiResponse<InventoryReceipt>>("/inventory-transactions/receipts", input); return data.data; }
+export async function getGoodsReceipt(id: string) { const { data } = await http.get<ApiResponse<InventoryReceipt>>(`/inventory-transactions/receipts/${id}`); return data.data; }
+export async function listGoodsReceipts(from: string, to: string) { const { data } = await http.get<ApiResponse<InventoryReceipt[]>>("/inventory-transactions/receipts", { params: { from, to } }); return data.data; }
+export async function listPurchaseOrders(status?: string) { const { data } = await http.get<ApiResponse<PurchaseOrder[]>>("/admin/purchase-orders", { params: { status } }); return data.data; }
+export async function createPurchaseOrder(input: { supplierName: string; supplierReference: string; expectedAt?: string; note: string; items: Array<{ product: string; quantity: number }> }) { const { data } = await http.post<ApiResponse<PurchaseOrder>>("/admin/purchase-orders", input); return data.data; }
+export async function getPurchaseOrder(id: string) { const { data } = await http.get<ApiResponse<{ order: PurchaseOrder; receipts: InventoryReceipt[] }>>(`/admin/purchase-orders/${id}`); return data.data; }
+export async function receivePurchaseOrder(id: string, input: { deliveryNote: string; receivedAt: string; note: string; items: Array<{ product: string; quantity: number }> }) { const { data } = await http.post<ApiResponse<InventoryReceipt>>(`/admin/purchase-orders/${id}/receipts`, input); return data.data; }
+export function stockStatus(product: Pick<Product, "stock" | "lowStockThreshold">) { return product.stock === 0 ? "Out of Stock" : product.stock <= product.lowStockThreshold ? "Low Stock" : "In Stock"; }
