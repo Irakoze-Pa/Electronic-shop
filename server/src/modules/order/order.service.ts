@@ -40,6 +40,8 @@ async function restoreInventory(
   session: mongoose.ClientSession,
 ) {
   if (order.inventoryRestored) return;
+  const inventoryActor = order.cashier ?? order.user;
+  if (!inventoryActor) throw new AppError("Order has no inventory audit owner", 500);
   for (const item of order.items)
     {
     const product = await Product.findOneAndUpdate(
@@ -51,7 +53,7 @@ async function restoreInventory(
       product: item.product, type: "Increase", quantity: item.quantity,
       previousStock: product.stock, newStock: product.stock + item.quantity,
       reason: "Order cancelled", note: order.orderNumber,
-      createdBy: order.user, order: order._id,
+      createdBy: inventoryActor, order: order._id,
     }], { session });
     }
   order.inventoryRestored = true;
@@ -205,6 +207,75 @@ export const orderService = {
     if (!created) throw new AppError("Order could not be created", 500);
     return customerOrder(created);
   },
+  async createPhysicalSale(actorId: string, input: {
+    customerId?: string;
+    customerName: string;
+    customerPhone: string;
+    paymentMethod: "Cash" | "MobileMoney" | "Card" | "BankTransfer";
+    amountPaid: number;
+    discount: number;
+    note: string;
+    items: Array<{ product: string; quantity: number }>;
+  }) {
+    const session = await mongoose.startSession();
+    let created;
+    try {
+      await session.withTransaction(async () => {
+        const cashier = await User.findById(actorId).session(session);
+        if (!cashier) throw new AppError("Cashier not found", 404);
+        const customer = input.customerId
+          ? await User.findOne({ _id: input.customerId, role: "Customer", status: "Active" }).session(session)
+          : null;
+        if (input.customerId && !customer) throw new AppError("Customer not found or inactive", 400);
+        const items = [];
+        const stockTransactions: Array<{ product: Types.ObjectId; quantity: number; previousStock: number }> = [];
+        let subtotal = 0;
+        for (const requested of input.items) {
+          const product = await Product.findOneAndUpdate(
+            { _id: requested.product, status: "Active", stock: { $gte: requested.quantity } },
+            { $inc: { stock: -requested.quantity } },
+            { returnDocument: "before", session },
+          );
+          if (!product) throw new AppError("A product is unavailable or has insufficient stock", 400);
+          const lineSubtotal = product.price * requested.quantity;
+          subtotal += lineSubtotal;
+          items.push({ product: product._id, productName: product.name, sku: product.code, image: product.images[0] ?? "", quantity: requested.quantity, unitPrice: product.price, subtotal: lineSubtotal });
+          stockTransactions.push({ product: product._id, quantity: requested.quantity, previousStock: product.stock });
+        }
+        if (input.discount > subtotal) throw new AppError("Discount cannot exceed the subtotal", 400);
+        const total = subtotal - input.discount;
+        if (input.amountPaid < total) throw new AppError("Amount paid cannot be less than the sale total", 400);
+        const orderNumber = await nextOrderNumber(session);
+        const name = customer ? `${customer.firstName} ${customer.lastName}` : input.customerName;
+        [created] = await Order.create([{
+          orderNumber,
+          user: customer?._id ?? null,
+          salesChannel: "PhysicalShop",
+          cashier: actorId,
+          customerName: name,
+          customerEmail: customer?.email ?? "walk-in@physical.shop",
+          customerPhone: customer?.phone || input.customerPhone,
+          shippingAddress: { fullName: name, phone: customer?.phone || input.customerPhone, country: "", city: "", district: "", sector: "", addressLine: "Collected in store", landmark: "", postalCode: "" },
+          items, subtotal, shippingFee: 0, discount: input.discount, total,
+          paymentMethod: input.paymentMethod,
+          amountPaid: input.amountPaid,
+          changeReturned: input.amountPaid - total,
+          paymentStatus: "Paid",
+          orderStatus: "Delivered",
+          customerNote: input.note,
+          statusHistory: [{ status: "Delivered", changedBy: actorId, note: "Physical shop sale completed", changedAt: new Date() }],
+        }], { session });
+        await InventoryTransaction.insertMany(stockTransactions.map((stock) => ({
+          product: stock.product, type: "Decrease", quantity: stock.quantity,
+          previousStock: stock.previousStock, newStock: stock.previousStock - stock.quantity,
+          reason: "Physical shop sale", note: created!.orderNumber,
+          createdBy: actorId, order: created!._id,
+        })), { session });
+      });
+    } finally { await session.endSession(); }
+    if (!created) throw new AppError("Physical sale could not be created", 500);
+    return created;
+  },
   listMine(userId: string) {
     return Order.find({ user: userId }).sort({ createdAt: -1 });
   },
@@ -251,6 +322,7 @@ export const orderService = {
     search?: string;
     orderStatus?: OrderStatus;
     paymentStatus?: PaymentStatus;
+    salesChannel?: "Online" | "PhysicalShop";
     from?: Date;
     to?: Date;
     page: number;
@@ -268,6 +340,7 @@ export const orderService = {
     }
     if (query.orderStatus) filter.orderStatus = query.orderStatus;
     if (query.paymentStatus) filter.paymentStatus = query.paymentStatus;
+    if (query.salesChannel) filter.salesChannel = query.salesChannel;
     if (query.from || query.to) filter.createdAt = {
       ...(query.from ? { $gte: query.from } : {}),
       ...(query.to ? { $lte: new Date(new Date(query.to).setHours(23, 59, 59, 999)) } : {}),

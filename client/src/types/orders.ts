@@ -24,7 +24,8 @@ export type OrderStatus =
   | "Delivered"
   | "Cancelled";
 export type PaymentStatus = "Pending" | "Paid" | "Failed" | "Refunded";
-export type PaymentMethod = "CashOnDelivery" | "BankTransfer";
+export type PaymentMethod = "CashOnDelivery" | "BankTransfer" | "Cash" | "MobileMoney" | "Card";
+export type SalesChannel = "Online" | "PhysicalShop";
 export interface OrderItem {
   product: string;
   productName: string;
@@ -46,6 +47,8 @@ export interface Order {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  salesChannel: SalesChannel;
+  cashier?: string;
   shippingAddress: Omit<
     Address,
     "_id" | "isDefault" | "createdAt" | "updatedAt"
@@ -56,6 +59,8 @@ export interface Order {
   discount: number;
   total: number;
   paymentMethod: PaymentMethod;
+  amountPaid: number;
+  changeReturned: number;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
   customerNote: string;

@@ -5,6 +5,7 @@ import { Product } from "../product/product.model.js";
 import { User } from "../user/user.model.js";
 import type { UserStatus } from "../user/user.types.js";
 import { AppError } from "../../utils/AppError.js";
+import bcrypt from "bcryptjs";
 
 export const revenueStatuses = ["Delivered"] as const;
 function dateRange(period: string, from?: Date, to?: Date) {
@@ -57,6 +58,19 @@ export const adminService = {
     const pipeline = [{ $match: match }, { $lookup: { from: "orders", localField: "_id", foreignField: "user", as: "orders" } }, { $addFields: { totalOrders: { $size: "$orders" }, totalSpent: { $sum: { $map: { input: { $filter: { input: "$orders", as: "order", cond: { $eq: ["$$order.orderStatus", "Delivered"] } } }, as: "order", in: "$$order.total" } } } } }, { $project: { password: 0, orders: 0 } }, { $sort: { createdAt: -1 as const } }];
     const [items, total] = await Promise.all([User.aggregate([...pipeline, { $skip: (query.page - 1) * query.limit }, { $limit: query.limit }]), User.countDocuments(match)]);
     return { items, pagination: { page: query.page, limit: query.limit, total, pages: Math.ceil(total / query.limit) } };
+  },
+  async createCustomer(input: { firstName: string; lastName: string; email: string; phone: string; temporaryPassword: string }) {
+    if (await User.exists({ email: input.email })) throw new AppError("An account with that email already exists", 409);
+    const customer = await User.create({
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      phone: input.phone,
+      password: await bcrypt.hash(input.temporaryPassword, 12),
+      role: "Customer",
+      status: "Active",
+    });
+    return User.findById(customer._id).select("firstName lastName email phone status createdAt updatedAt");
   },
   async customer(id: string) {
     const objectId = new Types.ObjectId(id);

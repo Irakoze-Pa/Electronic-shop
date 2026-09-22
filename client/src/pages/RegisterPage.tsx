@@ -108,7 +108,7 @@ export function RegisterPage() {
           </p>
         )}
         <button
-          className="w-full rounded-xl bg-slate-950 hover:bg-slate-800 px-5 py-3 font-bold text-white disabled:opacity-50"
+          className="w-full rounded-xl bg-sky-500 px-5 py-3 font-bold text-white shadow-sm transition hover:bg-sky-600 focus:outline-none focus:ring-4 focus:ring-sky-100 disabled:opacity-50"
           disabled={submitting}
           type="submit"
         >
@@ -117,7 +117,7 @@ export function RegisterPage() {
       </form>
       <p className="mt-6 text-center text-sm text-slate-500">
         Already registered?{" "}
-        <Link className="font-bold text-orange-700 hover:text-orange-800" replace state={location.state} to="/login">
+        <Link className="font-bold text-sky-600 hover:text-sky-700" replace state={location.state} to="/login">
           Sign in
         </Link>
       </p>

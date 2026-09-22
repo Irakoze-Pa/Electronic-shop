@@ -44,11 +44,25 @@ export async function listAdminOrders(params: {
   from?: string;
   to?: string;
   sort?: string;
+  salesChannel?: string;
 }) {
   const { data } = await http.get<
     ApiResponse<Order[]> & { pagination: Pagination; totals: { orderValue: number; deliveredRevenue: number } }
   >("/admin/orders", { params });
   return data;
+}
+export async function createPhysicalSale(input: {
+  customerId?: string;
+  customerName: string;
+  customerPhone: string;
+  paymentMethod: "Cash" | "MobileMoney" | "Card" | "BankTransfer";
+  amountPaid: number;
+  discount: number;
+  note: string;
+  items: Array<{ product: string; quantity: number }>;
+}) {
+  const { data } = await http.post<ApiResponse<Order>>("/admin/orders/pos", input);
+  return data.data;
 }
 export async function getAdminOrder(id: string) {
   const { data } = await http.get<ApiResponse<Order>>(`/admin/orders/${id}`);

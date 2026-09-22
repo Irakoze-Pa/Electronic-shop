@@ -110,6 +110,7 @@ export function AdminOrdersPage() {
             <tr>
               {[
                 "Order",
+                "Channel",
                 "Customer",
                 "Date",
                 "Items",
@@ -128,6 +129,7 @@ export function AdminOrdersPage() {
             {orders.map((o) => (
               <tr className="border-t" key={o._id}>
                 <td className="px-4 py-4 font-black">{o.orderNumber}</td>
+                <td className="px-4 py-4"><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{o.salesChannel === "PhysicalShop" ? "Shop" : "Online"}</span></td>
                 <td className="px-4 py-4">
                   {o.customerName}
                   <br />

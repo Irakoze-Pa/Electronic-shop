@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth, requireRole } from "../auth/auth.middleware.js";
 import {
   cancelMyOrder,
+  createPhysicalSale,
   createOrder,
   getAdminOrder,
   getCheckoutSummary,
@@ -21,6 +22,7 @@ orderRouter.post("/my/:id/cancel", cancelMyOrder);
 export const adminOrderRouter = Router();
 adminOrderRouter.use(requireAuth, requireRole("Admin"));
 adminOrderRouter.get("/", listAdminOrders);
+adminOrderRouter.post("/pos", createPhysicalSale);
 adminOrderRouter.get("/:id", getAdminOrder);
 adminOrderRouter.patch("/:id/status", updateAdminOrderStatus);
 adminOrderRouter.patch("/:id/payment-status", updateAdminPaymentStatus);

@@ -57,7 +57,7 @@ export function OrderDetailsView({
       </section>
       <div className="grid gap-6 md:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="font-black">Shipping</h2>
+          <h2 className="font-black">{order.salesChannel === "PhysicalShop" ? "Collection" : "Shipping"}</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             {order.shippingAddress.fullName}
             <br />
@@ -77,9 +77,7 @@ export function OrderDetailsView({
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <h2 className="font-black">Payment and totals</h2>
           <p className="mt-2 text-sm text-slate-600">
-            {order.paymentMethod === "CashOnDelivery"
-              ? "Cash on delivery"
-              : "Bank transfer"}
+            {paymentLabels[order.paymentMethod]}
           </p>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
@@ -129,3 +127,11 @@ export function OrderDetailsView({
     </div>
   );
 }
+
+const paymentLabels: Record<Order["paymentMethod"], string> = {
+  CashOnDelivery: "Cash on delivery",
+  BankTransfer: "Bank transfer",
+  Cash: "Cash",
+  MobileMoney: "Mobile Money",
+  Card: "Card",
+};

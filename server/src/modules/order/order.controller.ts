@@ -4,6 +4,7 @@ import {
   createOrderSchema,
   orderQuerySchema,
   paymentStatusUpdateSchema,
+  physicalSaleSchema,
   statusUpdateSchema,
 } from "./order.validation.js";
 const uid = (request: Parameters<RequestHandler>[0]) => request.authUser!._id;
@@ -47,6 +48,12 @@ export const listAdminOrders: RequestHandler = async (req, res) => {
     totals: result.totals,
   });
 };
+export const createPhysicalSale: RequestHandler = async (req, res) =>
+  res.status(201).json({
+    success: true,
+    data: await orderService.createPhysicalSale(uid(req), physicalSaleSchema.parse(req.body)),
+    message: "Physical shop sale completed",
+  });
 export const getAdminOrder: RequestHandler = async (req, res) =>
   res.json({
     success: true,

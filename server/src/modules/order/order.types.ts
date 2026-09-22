@@ -15,8 +15,16 @@ export const paymentStatuses = [
   "Refunded",
 ] as const;
 export type PaymentStatus = (typeof paymentStatuses)[number];
-export const paymentMethods = ["CashOnDelivery", "BankTransfer"] as const;
+export const paymentMethods = [
+  "CashOnDelivery",
+  "BankTransfer",
+  "Cash",
+  "MobileMoney",
+  "Card",
+] as const;
 export type PaymentMethod = (typeof paymentMethods)[number];
+export const salesChannels = ["Online", "PhysicalShop"] as const;
+export type SalesChannel = (typeof salesChannels)[number];
 export const orderTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
   Pending: ["Confirmed", "Cancelled"],
   Confirmed: ["Processing", "Cancelled"],

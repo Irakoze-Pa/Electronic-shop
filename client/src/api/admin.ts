@@ -4,6 +4,7 @@ import type { Customer, CustomerDetails, DashboardData, InventoryReceipt, Invent
 export async function getDashboard() { const { data } = await http.get<ApiResponse<DashboardData>>("/admin/dashboard"); return data.data; }
 export async function getSalesReport(params: { period: string; from?: string; to?: string }) { const { data } = await http.get<ApiResponse<SalesReport>>("/admin/reports/sales", { params }); return data.data; }
 export async function listCustomers(params: { search?: string; status?: string; page?: number }) { const { data } = await http.get<Paginated<Customer>>("/admin/customers", { params }); return data; }
+export async function createCustomer(input: { firstName: string; lastName: string; email: string; phone: string; temporaryPassword: string }) { const { data } = await http.post<ApiResponse<Customer>>("/admin/customers", input); return data.data; }
 export async function getCustomer(id: string) { const { data } = await http.get<ApiResponse<CustomerDetails>>(`/admin/customers/${id}`); return data.data; }
 export async function setCustomerStatus(id: string, status: "Active" | "Inactive") { const { data } = await http.patch<ApiResponse<Customer>>(`/admin/customers/${id}/status`, { status }); return data.data; }
 export async function listInventory(params: { product?: string; type?: InventoryType; from?: string; to?: string; page?: number } = {}) { const { data } = await http.get<Paginated<InventoryTransaction>>("/inventory-transactions", { params }); return data; }

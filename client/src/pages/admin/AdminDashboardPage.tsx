@@ -114,6 +114,12 @@ export function AdminDashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              className="rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold text-white hover:bg-sky-600"
+              to="/admin/pos"
+            >
+              + New shop sale
+            </Link>
             <button
               className="rounded-xl border border-slate-600 px-5 py-3 text-sm font-bold hover:bg-slate-800 disabled:opacity-50"
               disabled={refreshing}
@@ -175,8 +181,17 @@ export function AdminDashboardPage() {
       </section>
       <section
         aria-label="Priorities and shortcuts"
-        className="mt-6 grid gap-4 lg:grid-cols-3"
+        className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"
       >
+        <Link
+          className="group rounded-2xl border border-sky-200 bg-sky-50 p-5 transition hover:border-sky-400 hover:bg-sky-100"
+          to="/admin/pos"
+        >
+          <span className="grid size-10 place-items-center rounded-xl bg-sky-500 text-xl font-black text-white">+</span>
+          <h2 className="mt-4 font-black text-slate-950">Record a shop sale</h2>
+          <p className="mt-2 text-xs leading-5 text-slate-600">Select products, customer, and payment, then print a receipt.</p>
+          <span className="mt-4 inline-block text-xs font-bold text-sky-700 group-hover:underline">Open point of sale →</span>
+        </Link>
         <Shortcut
           count={m.pendingOrders}
           title="Review pending orders"

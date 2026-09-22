@@ -35,6 +35,7 @@ import { AdminPurchaseOrdersPage } from "./pages/admin/AdminPurchaseOrdersPage";
 import { AdminPurchaseOrderDetailsPage } from "./pages/admin/AdminPurchaseOrderDetailsPage";
 import { AdminGoodsReceiptPage } from "./pages/admin/AdminGoodsReceiptPage";
 import { AdminGoodsReceiptsRegisterPage } from "./pages/admin/AdminGoodsReceiptsRegisterPage";
+import { AdminPointOfSalePage } from "./pages/admin/AdminPointOfSalePage";
 
 export default function App() {
   const location = useLocation();
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="brands" element={<AdminBrandsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:id" element={<AdminOrderDetailsPage />} />
+          <Route path="pos" element={<AdminPointOfSalePage />} />
           <Route path="inventory" element={<AdminInventoryOverviewPage />} />
           <Route path="inventory/purchase-orders" element={<AdminPurchaseOrdersPage />} />
           <Route path="inventory/purchase-orders/:id" element={<AdminPurchaseOrderDetailsPage />} />

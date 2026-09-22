@@ -45,9 +45,16 @@ const orderSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
       index: true,
     },
+    salesChannel: {
+      type: String,
+      enum: ["Online", "PhysicalShop"],
+      default: "Online",
+      index: true,
+    },
+    cashier: { type: Schema.Types.ObjectId, ref: "User", default: null },
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     customerPhone: { type: String, default: "" },
@@ -58,6 +65,8 @@ const orderSchema = new Schema(
     discount: { type: Number, required: true, min: 0, default: 0 },
     total: { type: Number, required: true, min: 0 },
     paymentMethod: { type: String, enum: paymentMethods, required: true },
+    amountPaid: { type: Number, min: 0, default: 0 },
+    changeReturned: { type: Number, min: 0, default: 0 },
     paymentStatus: {
       type: String,
       enum: paymentStatuses,
